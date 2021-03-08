@@ -334,7 +334,7 @@ unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, 
 	unsigned int pairs_max=2;
 	unsigned int i, j, n, a, b, count;
 	int res1, res2;
-	command = (char *)malloc(sizeof(char)*(strlen(pdb_name)+35));
+	command = (char *)malloc(sizeof(char)*(strlen(pdb_name)+150));
 	(*compl) = (unsigned int *)malloc(sizeof(unsigned int)*(pairs_max+1));
 	(*compl_pairs) = (int **)malloc(sizeof(int *)*(pairs_max+1));
 	(*pairs) = (char **)malloc(sizeof(char *)*(pairs_max+1));
@@ -347,44 +347,44 @@ unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, 
 	{
 		sprintf(command, "find_pair %s out 2>/dev/null", pdb_name);
 		fp = popen(command, "r");
-	  	if (fp == NULL)
-	  	{
+		if (fp == NULL)
+		{
 			printf("Failed to run find_pair on %s\n", pdb_name);
 			exit(1);
-	  	}
-	  	pclose(fp);
+		}
+		pclose(fp);
 		out_file = fopen("out", "r");
 		if (out_file == NULL)
 		{
-	    		perror("find_pair failed");
-	    		exit(1);
-	  	}
-  	}
-  	else
-  	{
-  		char random_name[11];
-  		sprintf(random_name, "%.*s", 10, max_score_filename + strlen(max_score_filename)-21 );
-  		sprintf(command, "StructAlign/3dna.sh %s %s", pdb_name, random_name);
-  		fp = popen(command, "r");
-	  	if (fp == NULL)
-	  	{
-	  		FILE *max_score;
-	  		max_score = popen(max_score_filename, "w");
-			fprintf(max_score, "Error\nFailed to run find_pair on %s\n", pdb_name);
+			perror("find_pair failed");
 			exit(1);
-	  	}
-	  	pclose(fp);
-	  	char outname[46];
-	  	sprintf(outname, "/var/www/tools/tmp/StructAlign/%s/out", random_name);
+		}
+	}
+	else
+	{
+    sprintf(command, "/Users/braaist/Documents/StructAlign_togit/3dna.sh %s", pdb_name);
+		fp = popen(command, "r");
+		if (fp == NULL)
+		{
+      printf("%s\n", "here");
+			FILE *max_score;
+			max_score = popen(max_score_filename, "w");
+				fprintf(max_score, "Error\nFailed to run find_pair on %s\n", pdb_name);
+				exit(1);
+		}
+		pclose(fp);
+		char outname[146];
+		sprintf(outname, "/Users/braaist/Documents/StructAlign_togit/out");
 		out_file = fopen(outname, "r");
 		if (out_file == NULL)
 		{
+      printf("%s\n", "here");
 			FILE *max_score;
-	  		max_score = popen(max_score_filename, "w");
-	  		fprintf(max_score, "Error\nfind_pair failed");
-	    		exit(1);
-	  	}
-  	}
+			max_score = popen(max_score_filename, "w");
+			fprintf(max_score, "Error\nfind_pair failed");
+			exit(1);
+		}
+	}
 	fgets (c, 102, out_file);
 	fgets (c, 102, out_file);
 	fgets (c, 102, out_file);
@@ -864,7 +864,6 @@ void BestDiag(double **measures, unsigned int n, unsigned int m, double *S_max,
     *i_start = i+1;
     *j_start = j+1;
 
-    printf("\nS max: %lg, i_start: %d, j_start: %d, i_max: %d, j_max: %d, max_M: %lg\n", max_sum, i+1, j+1, max_i, max_j, measure_max);
     //Enable in test mode
 
     //print S-table
@@ -2188,7 +2187,6 @@ static char encodeP(const struct atom* v) {
 
 void writegk(const char* path, const char* pdbname, char** infiles, size_t num_pdbs, struct atom** chains, unsigned int* n_chains, unsigned int n, unsigned int centroid_id) {
 	FILE* out = fopen(path, "w");
-	assert(strlen(pdbname) > 4 && strcmp(pdbname + strlen(pdbname) - 4, ".pdb") == 0);
 	unsigned int** atoms = malloc(sizeof(unsigned int*) * n);
 	unsigned int* n_atoms = malloc(sizeof(unsigned int) * n);
 	for (int i=0;i<n;i++) {
@@ -2302,8 +2300,11 @@ void writegk(const char* path, const char* pdbname, char** infiles, size_t num_p
     }
     unsigned int compare_to = i % 3 + centroid_id*3;
     if (i%3==0) {
+      fprintf(out, "%c\n", chain_name);
       fprintf(out, "(%s):%c.%s/1\n", formatted[i+1], chain_name++, i+1 % 3 == 0?"CA":"P");
+      fprintf(out, "%c\n", chain_name);
       fprintf(out, "(%s):%c.%s/1\n", formatted[i+2], chain_name++, i+2 % 3 == 0?"CA":"P");
+      fprintf(out, "%c\n", chain_name);
       fprintf(out, "(%s):%c.%s/1\n", formatted[i], chain_name++, i % 3 == 0?"CA":"P");
     }
   }

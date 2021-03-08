@@ -337,7 +337,6 @@ int main  (int argc, char **argv)
 	   OF SOME VARIABLES */
 	/*** For server ***/
 	FILE *max_score;
-	//printf("%s", max_score_filename);
 	max_score = fopen(max_score_filename, "w");
 	if (max_score == NULL) {
 		perror(max_score_filename);
@@ -441,7 +440,7 @@ int main  (int argc, char **argv)
 
 		if (probe.S_max == 0)
 			fprintf(max_score, "Warning! The score is zero! It seems you have specified wrong parameters.\n");
-/*
+
 		unsigned int i_max_measure_compl, j_max_measure_compl;
 		unsigned int is_reverse1, is_reverse2;
 
@@ -512,7 +511,7 @@ int main  (int argc, char **argv)
 		sprintf(j_max_measure_compl_str, "%d", j_max_measure_compl_num);
 
 		fprintf(max_score, "%c %c %c %c %c %c %s %s %s %s %u %u\n%lg\n%s %s\n%s %s\n%s %s\n%s %s\n", chain_names[i], chain_names[centroid], pdbs[i].pairs[probe.pair1][1], pdbs[i].pairs[probe.pair1][2], pdbs[centroid].pairs[probe.pair2][1], pdbs[centroid].pairs[probe.pair2][2], probe.atoms_dna1[probe.list_P1[probe.i_max_measure]].ResNumber, probe.atoms_dna2[probe.list_P2[probe.j_max_measure]].ResNumber, i_max_measure_compl_str, j_max_measure_compl_str, is_reverse1, is_reverse2, probe.S_max, dna_seq11, dna_num_seq11, dna_seq12, dna_num_seq12, dna_seq21, dna_num_seq21, dna_seq22, dna_num_seq22);
-*/
+
 		struct atom *atoms_dna_i1 = NULL;
 		struct atom *atoms_dna_i2 = NULL;
 		struct atom *atoms_dna_i1_tmp = NULL;
