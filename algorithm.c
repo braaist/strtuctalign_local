@@ -298,39 +298,48 @@ int main  (int argc, char **argv)
 	   throw exception if not complete */
 	//printf("%s %s %s %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
 
-	if (argc < 4 || (argc - 4) % 4 != 0)
+	if (argc != 11)
 	{
-		printf("\nUsage: %s <output file> <file name for score> <is on server> <input file [i].pdb> <chain[i]> <start[i]> <end[i]>", argv[0]);
-		printf("\nExample: %s superpos_3hdd_1puf.pdb max_score.txt 0 3hdd.pdb A 5 60 1puf.pdb B zero inf\n\n", argv[0]);
+		printf("\nUsage: %s -i <input file> -o <output file> -f <file name for score> -s <is on server> -g <gk file>", argv[0]);
+		printf("\nExample: %s -i input.txt -o out.txt -i results.txt -s 1 -g out.gk\n\n", argv[0]);
 		exit (1);
-	} /* end if */
-
-	/* Done checking command line */
-
-	/* Reading command line arguments */
-
-	char *outfile, *max_score_filename;
-	unsigned int SERVER;
-
-	outfile = (char *)malloc( sizeof(char)*(strlen(argv[1])+1) );
-	sscanf(argv[1], "%s", outfile);
-	max_score_filename = (char *)malloc( sizeof(char)*(strlen(argv[2])+1) );
-	sscanf(argv[2], "%s", max_score_filename);
-	sscanf(argv[3], "%u", &SERVER);
-	size_t num_pdbs = (argc - 4) / 4;
-	char** infiles = malloc(sizeof(char*) * num_pdbs);
-	char* chain_names = malloc(num_pdbs);
-	char** starts = malloc(sizeof(char*) * num_pdbs);
-	char** ends = malloc(sizeof(char*) * num_pdbs);
-	for (int i=0; i < num_pdbs; i++) {
-		infiles[i] = malloc(strlen(argv[4+i*4])+1);
-		strcpy(infiles[i], argv[4+i*4]);
-		sscanf(argv[4+i*4+1], "%c", &chain_names[i]);
-		starts[i] = malloc(strlen(argv[4+i*4+2])+1);
-		strcpy(starts[i], argv[4+i*4+2]);
-		ends[i] = malloc(strlen(argv[4+i*4+3])+1);
-		strcpy(ends[i], argv[4+i*4+3]);
 	}
+
+  FILE * fp;
+	unsigned int SERVER;
+  char *outfile, *inpfile, *gkfile, *max_score_filename;
+  char** infiles;
+  max_score_filename = (char *)malloc( sizeof(char)*(strlen(argv[6])+1) );
+  inpfile = (char *)malloc( sizeof(char)*(strlen(argv[2])+1) );
+  outfile = (char *)malloc( sizeof(char)*(strlen(argv[4])+1) );
+  gkfile = (char *)malloc( sizeof(char)*(strlen(argv[10])+1) );
+  infiles = malloc(sizeof(char*) * 12);
+  char* chain_names = malloc(12);
+	char** starts = malloc(sizeof(char*) * 12);
+	char** ends = malloc(sizeof(char*) * 12);
+
+  sscanf(argv[2], "%s", inpfile);
+  sscanf(argv[4], "%s", outfile);
+  sscanf(argv[6], "%s", max_score_filename);
+	sscanf(argv[8], "%u", &SERVER);
+  sscanf(argv[10], "%s", gkfile);
+
+  fp = fopen(inpfile, "r");
+  if (fp == NULL)
+    exit(1);
+
+  char str1[10], str2[10], str3[10], str4[10];
+  unsigned long num_pdbs = 0;
+  while (fscanf(fp, "%s %s %s %s\n", str1, str2, str3, str4) != EOF){
+    infiles[num_pdbs] = malloc(strlen(str1)+1);
+    strcpy(infiles[num_pdbs], str1);
+    sscanf(str2, "%c", &chain_names[num_pdbs]);
+		starts[num_pdbs] = malloc(strlen(str3)+1);
+		strcpy(starts[num_pdbs], str3);
+		ends[num_pdbs] = malloc(strlen(str4)+1);
+		strcpy(ends[num_pdbs], str4);
+    num_pdbs++;
+		}
 	/* Done reading arguments */
 
 	/* DECLARATION AND ASSIGNMENT
@@ -555,7 +564,7 @@ int main  (int argc, char **argv)
 		writetoPDB(outfile, chains[i], n_chains[i]);
 	}
 	endPDB(outfile);
-	writegk("out.gk", outfile, infiles, num_pdbs, chains, n_chains, num_pdbs*3, centroid);
+	writegk(gkfile, outfile, infiles, num_pdbs, chains, n_chains, num_pdbs*3, centroid);
 	return 0;
 }
 /* End main */
