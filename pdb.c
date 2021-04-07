@@ -604,7 +604,6 @@ struct coordsystem ChangeSystem(struct atom * atoms_from,
     (*atoms_to)[i].XCoord = currv.X;
     (*atoms_to)[i].YCoord = currv.Y;
     (*atoms_to)[i].ZCoord = currv.Z;
-	(*atoms_to)[i].Chain = chainname;
   }
     //printf("L5\n");  // Enable in test mode
 
@@ -637,7 +636,6 @@ unsigned int ChangeSystemR(struct atom * atoms_from,
     (*atoms_to)[i].XCoord = currv.X;
     (*atoms_to)[i].YCoord = currv.Y;
     (*atoms_to)[i].ZCoord = currv.Z;
-	(*atoms_to)[i].Chain = chainname;
   }
 
   return 0;
@@ -2293,19 +2291,15 @@ void writegk(const char* path, const char* pdbname, char** infiles, size_t num_p
 		free(gaps);
 		free(gapsNeeded);
 	}
-	char chain_name = 'A';
   for (int i = 0; i<n;i++) {
     if (i%3==0) {
       fprintf(out, "&%.*s\n", (int) strlen(infiles[i/3]) - 4, infiles[i/3]);
     }
     unsigned int compare_to = i % 3 + centroid_id*3;
     if (i%3==0) {
-      fprintf(out, "%c\n", chain_name);
-      fprintf(out, "(%s):%c.%s/1\n", formatted[i+1], chain_name++, i+1 % 3 == 0?"CA":"P");
-      fprintf(out, "%c\n", chain_name);
-      fprintf(out, "(%s):%c.%s/1\n", formatted[i+2], chain_name++, i+2 % 3 == 0?"CA":"P");
-      fprintf(out, "%c\n", chain_name);
-      fprintf(out, "(%s):%c.%s/1\n", formatted[i], chain_name++, i % 3 == 0?"CA":"P");
+      fprintf(out, "(%s):%c.%s/1\n", formatted[i+1], (chains[i+1])[1].Chain, i+1 % 3 == 0?"CA":"P");
+      fprintf(out, "(%s):%c.%s/1\n", formatted[i+2], (chains[i+2])[1].Chain, i+2 % 3 == 0?"CA":"P");
+      fprintf(out, "(%s):%c.%s/1\n", formatted[i], (chains[i])[1].Chain, i % 3 == 0?"CA":"P");
     }
   }
   fclose(out);

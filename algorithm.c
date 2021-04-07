@@ -50,7 +50,7 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 	/*** MAIN FOR CYCLE ***/
 	struct atom *atoms_prot_CA1 = NULL;
 	struct atom *atoms_prot_C1 = NULL;
-	struct atom *atoms_prot_i1, *atoms_prot_i2;
+	struct atom *atoms_prot_i1;
 	struct atom *atoms_prot_j1, *atoms_prot_j2;
 	struct atom *C_atoms_prot_i1 = NULL, *C_atoms_prot_j2 = NULL;
 	for (unsigned int pair1=1; pair1<=pdb1->n_pairs; pair1++)
@@ -390,6 +390,7 @@ int main  (int argc, char **argv)
 		/*** For server ***/
 
 		printf("DNA chains: %s;\n", dna_chains);
+		printf("%s\n", infiles[pdb_i]);
 		/* Done reading */
 
 		/*** 3DNA block ***/
@@ -527,9 +528,10 @@ int main  (int argc, char **argv)
 		struct atom *atoms_dna_i2_tmp = NULL;
 		/* Change the system to i and j coordinates, write the alignment to file */
 
-		struct atom *atoms_prot_i1, *atoms_prot_i2;
-		struct atom *atoms_prot_i1_tmp, *atoms_prot_i2_tmp;
+		struct atom *atoms_prot_i1;
+		struct atom *atoms_prot_i1_tmp;
 		struct atom *atoms_prot_j1, *atoms_prot_j2;
+
 		struct coordsystem invertion = ChangeSystem(pdbs[centroid].atoms_prot, pdbs[centroid].n, &atoms_prot_j2, probe.atoms_dna2[probe.list_P2[probe.j_max_measure]], probe.atoms_dna2[probe.list_C12[probe.j_max_measure+1]], probe.atoms_dna2[probe.list_OP12[probe.j_max_measure]], probe.atoms_dna2[probe.list_OP22[probe.j_max_measure]], 'F');
 
 		struct coordsystem prot_system = ChangeSystem(pdbs[i].atoms_prot, pdbs[i].n, &atoms_prot_i1_tmp, probe.atoms_dna1[probe.list_P1[probe.i_max_measure]], probe.atoms_dna1[probe.list_C11[probe.i_max_measure+1]], probe.atoms_dna1[probe.list_OP11[probe.i_max_measure]], probe.atoms_dna1[probe.list_OP21[probe.i_max_measure]], 'E');
