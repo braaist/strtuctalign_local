@@ -240,7 +240,7 @@ void Seq(struct atom *atoms, unsigned int n, char **seq, char **num_seq, unsigne
 			strcat( (*num_seq), "," );
 	}
 	(*seq)[(*m)] = '\0';
-	printf("%s\n", (*seq));
+	// printf("%s\n", (*seq));
 
 }
 
@@ -604,6 +604,7 @@ struct coordsystem ChangeSystem(struct atom * atoms_from,
     (*atoms_to)[i].XCoord = currv.X;
     (*atoms_to)[i].YCoord = currv.Y;
     (*atoms_to)[i].ZCoord = currv.Z;
+    (*atoms_to)[i].ChainRenamed = chainname;
   }
     //printf("L5\n");  // Enable in test mode
 
@@ -636,6 +637,7 @@ unsigned int ChangeSystemR(struct atom * atoms_from,
     (*atoms_to)[i].XCoord = currv.X;
     (*atoms_to)[i].YCoord = currv.Y;
     (*atoms_to)[i].ZCoord = currv.Z;
+    (*atoms_to)[i].ChainRenamed = chainname;
   }
 
   return 0;
@@ -915,7 +917,7 @@ unsigned int writetoPDB(char *filename,
   for (i=1; i<=natoms; i++){
     fprintf(flow_out, "ATOM  %5s  %-3s %3s %c%4s    %8.3f%8.3f%8.3f%6.2f%6.2f          %c  \n",
 atoms[i].AtomNumber,
-atoms[i].AtomName, atoms[i].ResType, atoms[i].Chain, atoms[i].ResNumber,
+atoms[i].AtomName, atoms[i].ResType, atoms[i].ChainRenamed, atoms[i].ResNumber,
 atoms[i].XCoord, atoms[i].YCoord, atoms[i].ZCoord, atoms[i].Occup, atoms[i].B,
 atoms[i].AtomName[0]);
 }
@@ -1378,7 +1380,7 @@ unsigned int readerPDB (char *filename, unsigned int *dnanum, unsigned int *prot
 				result = 1;
 		     }
 		     if (result == 0){
-			     printf("ADD DNA CHAIN %c for %s\n", currentatom.Chain, currentatom.ResType);
+			     printf("ADD DNA CHAIN %c for %s\n", currentatom.Chain, currentatom.PDBCode);
 		     	(*chains_dna)[count] = currentatom.Chain;
 		     	dna_chains_num++;
 		     	if (dna_chains_num >= dna_chains_max){
@@ -2291,15 +2293,19 @@ void writegk(const char* path, const char* pdbname, char** infiles, size_t num_p
 		free(gaps);
 		free(gapsNeeded);
 	}
+  printf("In order to avoid confusions, chains in output files were renamed:\n");
   for (int i = 0; i<n;i++) {
     if (i%3==0) {
       fprintf(out, "&%.*s\n", (int) strlen(infiles[i/3]) - 4, infiles[i/3]);
     }
     unsigned int compare_to = i % 3 + centroid_id*3;
     if (i%3==0) {
-      fprintf(out, "(%s):%c.%s/1\n", formatted[i+1], (chains[i+1])[1].Chain, i+1 % 3 == 0?"CA":"P");
-      fprintf(out, "(%s):%c.%s/1\n", formatted[i+2], (chains[i+2])[1].Chain, i+2 % 3 == 0?"CA":"P");
-      fprintf(out, "(%s):%c.%s/1\n", formatted[i], (chains[i])[1].Chain, i % 3 == 0?"CA":"P");
+      printf("Chain %c from %s structure was renamed %c \n", (chains[i])[1].Chain, (chains[i])[1].PDBCode, (chains[i])[1].ChainRenamed);
+      printf("Chain %c from %s structure was renamed %c \n", (chains[i+1])[1].Chain, (chains[i+1])[1].PDBCode, (chains[i+1])[1].ChainRenamed);
+      printf("Chain %c from %s structure was renamed %c \n", (chains[i+2])[1].Chain, (chains[i+2])[1].PDBCode, (chains[i+2])[1].ChainRenamed);
+      fprintf(out, "(%s):%c.%s/1\n", formatted[i+1], (chains[i+1])[1].ChainRenamed, i+1 % 3 == 0?"CA":"P");
+      fprintf(out, "(%s):%c.%s/1\n", formatted[i+2], (chains[i+2])[1].ChainRenamed, i+2 % 3 == 0?"CA":"P");
+      fprintf(out, "(%s):%c.%s/1\n", formatted[i], (chains[i])[1].ChainRenamed, i % 3 == 0?"CA":"P");
     }
   }
   fclose(out);

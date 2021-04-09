@@ -4,6 +4,7 @@
 #include <float.h>
 
 struct pdb_info {
+	char Name;
 	unsigned int all_m;
 	unsigned int n;
 	struct atom *all_atoms_dna;
@@ -89,7 +90,6 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			atomcpy(&atoms_prot_C1[i], pdb1->atoms_prot[list_C1[i]]);
 		}
 		// printf("Done atoms:\tP %u\tC1 %u\tOP1 %u\tOP2 %u\tCA %u\tC %u\n",n_P1, n_C11, n_OP11, n_OP21, n_CA1, n_C1);
-
 		for (unsigned int pair2=1; pair2<=pdb2->n_pairs; pair2++)
 		{
 			//printf("\nCYCLE %c:%c vs %c:%c\n", pdb1->pairs[pair1][1], pdb1->pairs[pair1][2], pdb2->pairs[pair2][1], pdb2->pairs[pair2][2]);
@@ -293,7 +293,22 @@ void reverseAtoms(struct atom* atoms, size_t n) {
 
 int main  (int argc, char **argv)
 {
-	puts("Program starts!!!");
+	puts("       ______               __  ___   ___             ");
+	puts("      / __/ /_______ ______/ /_/ _ | / (_)__ ____     ");
+	puts("     _\\ \\/ __/ __/ // / __/ __/ __ |/ / / _ `/ _ \\    ");
+	puts("    /___/\\__/_/  \\_,_/\\__/\\__/_/ |_/_/_/\\_, /_//_/    ");
+	puts("                                       /___/          ");
+	puts("\n");
+	puts("*********************************************************");
+	puts("* Program StructAlign inputs a pair of complexes of DNA *");
+	puts("* double helix with proteins and outputs an alignment   *");
+	puts("* of DNA chains corresponding to the best spatial fit   *");
+	puts("* of the protein chains. StructAlign is developed and   *");
+	puts("* maintained by a team from A.N. Belozersky Institute   *");
+	puts("* of Physico-Chemical Biology MSU and Faculty of        *");
+	puts("* Bioengineering and Bioinformatics MSU.                *");
+	puts("*********************************************************");
+	puts("\n");
 	/* Checking command line,
 	   throw exception if not complete */
 	//printf("%s %s %s %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
@@ -366,11 +381,11 @@ int main  (int argc, char **argv)
 		char *dna_chains = (char *)malloc( sizeof(char)*(2+1) );
 		unsigned int w=0;
 
-		printf("Reading %zu PDBs file...", pdb_i);
+		printf("Reading %zu PDBs file...\n\n", pdb_i+1);
 		struct pdb_info *cur_pdb = &pdbs[pdb_i];
 		readerPDB(infiles[pdb_i], &cur_pdb->all_m, &cur_pdb->n, &w, maxnumber, &cur_pdb->all_atoms_dna, &dna_chains, &cur_pdb->atoms_prot, &prot_chains, &cur_pdb->atoms_wat, &list);
 		// pdb.c function, read PDB and put protein, DNA and water atoms in three different arrays
-		printf("...done; %d atoms of dna, %d atoms of protein, %d atoms of water\n", cur_pdb->all_m, cur_pdb->n, w);
+		printf("\n...done; %d atoms of dna, %d atoms of protein, %d atoms of water\n", cur_pdb->all_m, cur_pdb->n, w);
 		if (cur_pdb->all_m == 0)
 		{	fprintf(max_score, "Error\n%zu structure has no DNA!", pdb_i);
 			exit(1); }
@@ -383,20 +398,20 @@ int main  (int argc, char **argv)
 		SelectChain(cur_pdb->atoms_prot, cur_pdb->n, &cur_pdb->atoms_prot, &cur_pdb->n, chain_names[pdb_i]);
 		SelectRange(cur_pdb->atoms_prot, cur_pdb->n, &cur_pdb->atoms_prot, &cur_pdb->n, starts[pdb_i], ends[pdb_i]);
 		// pdb.c function
-		printf("Atoms in selected chain: %u\n\n", cur_pdb->n);
+		printf("Atoms in selected chain: %u\n", cur_pdb->n);
 		// print to stdout number of protein atoms in selected chain
 
 		dna_chains[0] = ' ';
 		/*** For server ***/
 
-		printf("DNA chains: %s;\n", dna_chains);
-		printf("%s\n", infiles[pdb_i]);
+		printf("DNA chains identified in %s : %s;\n", str1, dna_chains);
 		/* Done reading */
 
 		/*** 3DNA block ***/
-
+		printf("%s\n", "Running find_pair from x3dna suite:");
 		run_3dna(infiles[pdb_i], &cur_pdb->compl_list, &cur_pdb->compl_pairs, &cur_pdb->pairs, &cur_pdb->n_pairs, SERVER, max_score_filename, '_', '_');
 		assert(cur_pdb->n_pairs > 0);
+		printf("%s\n", "find_pair completed succesfully!\n");
 	}
 	/*** 3DNA block end ***/
 	printf("SEARCHING FOR CENTROID\n");
@@ -421,7 +436,7 @@ int main  (int argc, char **argv)
 			centroid = pdb1_i;
 		}
 	}
-	printf("USE PDB %zu/%zu AS CENTROID (MIN SCORE IS %f)\n", centroid, num_pdbs, max_min_score);
+	printf("USE PDB %zu/%zu AS CENTROID (MIN SCORE IS %f)\n", centroid+1, num_pdbs, max_min_score);
 
 
 	char max_chain = 'A';
@@ -481,7 +496,7 @@ int main  (int argc, char **argv)
 		char *i_max_measure_compl_str, *j_max_measure_compl_str;
 		i_max_measure_compl_str = (char *)malloc( sizeof(char)*7 );
 		j_max_measure_compl_str = (char *)malloc( sizeof(char)*7 );
-		printf("%d\n", probe.list_P1[i_max_measure_compl]+1);
+		// printf("%d\n", probe.list_P1[i_max_measure_compl]+1);
 		sscanf(probe.atoms_dna1[probe.list_P1[i_max_measure_compl]].ResNumber, "%d", &i_max_measure_compl_num);
 		sscanf(probe.atoms_dna2[probe.list_P2[j_max_measure_compl]].ResNumber, "%d", &j_max_measure_compl_num);
 
@@ -533,7 +548,6 @@ int main  (int argc, char **argv)
 		struct atom *atoms_prot_j1, *atoms_prot_j2;
 
 		struct coordsystem invertion = ChangeSystem(pdbs[centroid].atoms_prot, pdbs[centroid].n, &atoms_prot_j2, probe.atoms_dna2[probe.list_P2[probe.j_max_measure]], probe.atoms_dna2[probe.list_C12[probe.j_max_measure+1]], probe.atoms_dna2[probe.list_OP12[probe.j_max_measure]], probe.atoms_dna2[probe.list_OP22[probe.j_max_measure]], 'F');
-
 		struct coordsystem prot_system = ChangeSystem(pdbs[i].atoms_prot, pdbs[i].n, &atoms_prot_i1_tmp, probe.atoms_dna1[probe.list_P1[probe.i_max_measure]], probe.atoms_dna1[probe.list_C11[probe.i_max_measure+1]], probe.atoms_dna1[probe.list_OP11[probe.i_max_measure]], probe.atoms_dna1[probe.list_OP21[probe.i_max_measure]], 'E');
 		ChangeSystemR(atoms_prot_i1_tmp, pdbs[i].n, &atoms_prot_i1, probe.atoms_dna2[probe.list_P2[probe.j_max_measure]], max_chain++, invertion);
 		struct coordsystem dna1_system = ChangeSystem(probe.dna1_chain1, probe.dna1_chain1_n, &atoms_dna_i1_tmp, probe.atoms_dna1[probe.list_P1[probe.i_max_measure]], probe.atoms_dna1[probe.list_C11[probe.i_max_measure+1]], probe.atoms_dna1[probe.list_OP11[probe.i_max_measure]], probe.atoms_dna1[probe.list_OP21[probe.i_max_measure]], 'A');

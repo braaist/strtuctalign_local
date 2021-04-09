@@ -31,6 +31,7 @@ struct atom {
    char Alter;
    char *ResType;
    char Chain;
+	 char ChainRenamed;
    char *ResNumber;
    char Insertion;
    double XCoord;
