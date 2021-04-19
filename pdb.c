@@ -240,8 +240,6 @@ void Seq(struct atom *atoms, unsigned int n, char **seq, char **num_seq, unsigne
 			strcat( (*num_seq), "," );
 	}
 	(*seq)[(*m)] = '\0';
-	// printf("%s\n", (*seq));
-
 }
 
 /********************************
@@ -362,11 +360,10 @@ unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, 
 	}
 	else
 	{
-    sprintf(command, "/Users/braaist/Documents/StructAlign_togit/3dna.sh %s", pdb_name);
+    sprintf(command, "find_pair %s find_pair.output", pdb_name);
 		fp = popen(command, "r");
 		if (fp == NULL)
 		{
-      printf("%s\n", "here");
 			FILE *max_score;
 			max_score = popen(max_score_filename, "w");
 				fprintf(max_score, "Error\nFailed to run find_pair on %s\n", pdb_name);
@@ -374,11 +371,10 @@ unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, 
 		}
 		pclose(fp);
 		char outname[146];
-		sprintf(outname, "/Users/braaist/Documents/StructAlign_togit/out");
+		sprintf(outname, "find_pair.output");
 		out_file = fopen(outname, "r");
 		if (out_file == NULL)
 		{
-      printf("%s\n", "here");
 			FILE *max_score;
 			max_score = popen(max_score_filename, "w");
 			fprintf(max_score, "Error\nfind_pair failed");

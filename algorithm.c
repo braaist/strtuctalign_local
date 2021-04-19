@@ -472,8 +472,8 @@ int main  (int argc, char **argv)
 		//printf("n_first_chain=%u i_max_measure=%u best_compl1=%u\n", best_n_first_chain, best_i_max_measure,  best_compl1);
 		is_reverse1 = ((probe.i_max_measure > probe.n_first_chain) ? 1 : 0);
 		is_reverse2 = ((probe.j_max_measure > probe.m_first_chain) ? 1 : 0);
-		i_max_measure_compl = ((probe.i_max_measure > probe.n_first_chain) ? probe.compl1-probe.i_max_measure+1 : probe.compl1-probe.i_max_measure+1);
-		j_max_measure_compl = ((probe.j_max_measure > probe.m_first_chain) ? probe.compl2-probe.j_max_measure+1 : probe.compl2-probe.j_max_measure+1);
+		i_max_measure_compl = probe.compl1-probe.i_max_measure+1;
+		j_max_measure_compl = probe.compl2-probe.j_max_measure+1;
 		//printf("i_max_measure=%u i_max_measure_compl=%u\n", best_i_max_measure, i_max_measure_compl);
 		//printf("i_max_measure_compl=%s\n", best_atoms_dna1[best_list_P1[i_max_measure_compl]].ResNumber);
 
