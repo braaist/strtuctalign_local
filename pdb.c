@@ -748,7 +748,7 @@ void find_compl(struct atom *atoms1, unsigned int *list_P, unsigned int *list_C1
 	}
 
 	(*compl) = (n_P1+k-1);
-	printf("k=%u; compl=%u; n_P1=%u\n", k, (*compl), n_P1 );
+	//printf("k=%u; compl=%u; n_P1=%u\n", k, (*compl), n_P1 );
 }
 
 
@@ -780,6 +780,7 @@ unsigned int run_find_compl(struct atom *atoms1_P, unsigned int n_P, unsigned in
 				//printf("k=%u i=%i %s=%s %s=%s\n", k, i, atoms1_P[i].ResNumber, res1, atoms1_P[n_P1+k-i].ResNumber, res2);
 				if ( (strcmp(atoms1_P[i].ResNumber, res1)==0) && (strcmp(atoms1_P[n_P1+k-i].ResNumber, res2)==0) )
 				{
+          //printf("here !!!!\n");
 					//printf("n_P1=%u, k=%u\n", n_P1, k);
 					(*compl) = (n_P1+k-1);
 					return 0;

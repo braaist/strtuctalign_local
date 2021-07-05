@@ -139,6 +139,7 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			// Enable if measure function returns unsigned int
 			for (unsigned int i=1; i<=n_P1; i++){
 				for (unsigned int j=1; j<=n_P2; j++){
+					//printf("%s\n", atoms_dna1[list_P1[i]].ResNumber);
 					list_measure[i][j] = 0;
 					if (i > n_OP11 || i > n_OP21 || i+1 > n_C11)continue;
 					if (j > n_OP12 || j > n_OP22 || j+1 > n_C12)continue;
@@ -207,16 +208,19 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			}
 
 			//find_compl(atoms_dna1, list_P1, list_C11, list_OP11, list_OP21, atoms_dna_P1, n_P1, &compl1, &n_first_chain);
+			//printf("compl1: %d\n", compl1);
+			//printf("compl2: %d\n", compl2);
 			(run_find_compl(atoms_dna_P1, n_P1, &compl1, &n_first_chain, pdb1->compl_pairs[pair1]));
 			//find_compl(atoms_dna2, list_P2, list_C12, list_OP12, list_OP22, atoms_dna_P2, n_P2, &compl2, &m_first_chain);
 			(run_find_compl(atoms_dna_P2, n_P2, &compl2, &m_first_chain, pdb2->compl_pairs[pair2]));
 			BestDiag(list_measure, n_P1, n_P2, &S_max, &i_max, &j_max, &i_start, &j_start, &i_max_measure, &j_max_measure,
 					atoms_dna1, list_P1, atoms_dna2, list_P2, compl1, compl2, n_first_chain, m_first_chain);
 			// pdb.c function
-			printf("%f\n", S_max);
+			printf("S_max in find best score %f\n", S_max);
 
 			/* Done diagonal search */
-
+			//printf("compl1 after diag: %d\n", compl1);
+			//printf("compl2: %d\n", compl2);
 			if (S_max > result->S_max)
 			{
 				result->S_max = S_max;
@@ -230,7 +234,10 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 				result->dna2_chain2_n = dna2_chain2_n;
 
 				atomlistcpy(&result->atoms_dna1, atoms_dna1, m1);
+				//printf("first %u\n", result->m1);
 				result->m1 = m1;
+				//printf("n_P1 %d\n", n_P1);
+				//printf("second %lu\n", sizeof(unsigned int)*(n_P1+1));
 				result->list_P1 = (unsigned int *)malloc(sizeof(unsigned int)*(n_P1+1));
 				result->list_C11 = (unsigned int *)malloc(sizeof(unsigned int)*(n_C11+1));
 				result->list_OP11 = (unsigned int *)malloc(sizeof(unsigned int)*(n_OP11+1));
@@ -474,17 +481,20 @@ int main  (int argc, char **argv)
 		is_reverse2 = ((probe.j_max_measure > probe.m_first_chain) ? 1 : 0);
 		i_max_measure_compl = probe.compl1-probe.i_max_measure+1;
 		j_max_measure_compl = probe.compl2-probe.j_max_measure+1;
+		//printf("fin %d, %d, %d\n", probe.compl1, probe.i_max_measure+1, probe.compl1-probe.i_max_measure+1);
+		//printf("fin2 %d, %d, %d\n", probe.compl2, probe.j_max_measure+1, probe.compl2-probe.j_max_measure+1);
 		//printf("i_max_measure=%u i_max_measure_compl=%u\n", best_i_max_measure, i_max_measure_compl);
 		//printf("i_max_measure_compl=%s\n", best_atoms_dna1[best_list_P1[i_max_measure_compl]].ResNumber);
-
-		if (i_max_measure_compl > dna_n11+dna_n12)
+		//printf("i_max_measure_compl =  %d, dna_n11+dna_n12 = %d\n",i_max_measure_compl, dna_n11+dna_n12);
+		if ((int)i_max_measure_compl > (int)(dna_n11+dna_n12))
 		{
+			//printf("here!!!!!!\n");
 			//printf("i_compl=%u n11=%u n12=%u\n", i_max_measure_compl, dna_n11, dna_n12);
 			j_max_measure_compl = j_max_measure_compl-(i_max_measure_compl-dna_n11-dna_n12);
 			i_max_measure_compl = dna_n11+dna_n12;
 			//printf("i_compl=%u n11=%u n12=%u\n", i_max_measure_compl, dna_n11, dna_n12);
 		}
-		if (j_max_measure_compl > dna_n21+dna_n22)
+		if ((int)j_max_measure_compl > (int)(dna_n21+dna_n22))
 		{
 			//printf("j_compl=%u n21=%u n22=%u\n", j_max_measure_compl, dna_n21, dna_n22);
 			i_max_measure_compl = i_max_measure_compl-(j_max_measure_compl-dna_n21-dna_n22);
@@ -496,7 +506,6 @@ int main  (int argc, char **argv)
 		char *i_max_measure_compl_str, *j_max_measure_compl_str;
 		i_max_measure_compl_str = (char *)malloc( sizeof(char)*7 );
 		j_max_measure_compl_str = (char *)malloc( sizeof(char)*7 );
-		// printf("%d\n", probe.list_P1[i_max_measure_compl]+1);
 		sscanf(probe.atoms_dna1[probe.list_P1[i_max_measure_compl]].ResNumber, "%d", &i_max_measure_compl_num);
 		sscanf(probe.atoms_dna2[probe.list_P2[j_max_measure_compl]].ResNumber, "%d", &j_max_measure_compl_num);
 
