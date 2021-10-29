@@ -171,7 +171,7 @@ unsigned int copyPDB(char *filename, char* src);
 unsigned int endPDB(char *filename);
 
 /* execute find_pair */
-unsigned int run_3dna(char *pdb_name, unsigned int **compl0, int ***compl_pairs, char ***pairs, unsigned int *len, unsigned int server, char *max_score_filename, char priority1, char priority2);
+unsigned int run_3dna(char *pdb_name, unsigned int **compl0, int ***compl_pairs, char ***pairs, unsigned int *len, char *max_score_filename, char priority1, char priority2);
 
 /* append list to another list */
 void atomlistmerge(struct atom **target, unsigned int *len, struct atom *source1, unsigned int len1, struct atom *source2, unsigned int len2);

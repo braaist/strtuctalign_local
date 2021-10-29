@@ -104,7 +104,6 @@ unsigned int SelectRange(struct atom * atoms_from, unsigned int n_from, struct a
 
 unsigned int getAtomsNumbers(struct atom * atoms_from, unsigned int n, unsigned int ** list_to, unsigned int * n_to, char * atoms_type){
   unsigned int i, k;
-
   *list_to = (unsigned int *)malloc( sizeof(unsigned int)*(n+1) );
   k=1;
   for (i=1; i<=n; i++){
@@ -144,7 +143,6 @@ unsigned int correctC1_P(struct atom *atoms_from, unsigned int **list_C, unsigne
 
   for (j=1; j<=(*n_P); j++)
   {
-    //printf("P: %s; C1: %s\n", atoms_from[list_P[j]].ResNumber, atoms_from[(*list_C)[j+1]].ResNumber);
     if ( j == (*n_C) ) //if number of P-atoms is greater than C1'-atoms
     {
     	(*n_P) -= 1;
@@ -159,7 +157,6 @@ unsigned int correctC1_P(struct atom *atoms_from, unsigned int **list_C, unsigne
         (*n_C) -= 1;
         for (i=j+1; i<=(*n_C); i++)
           {(*list_C)[i] = (*list_C)[i+1];}
-        //printf("P: %s; C1: %s\n", atoms_from[list_P[j]].ResNumber, atoms_from[(*list_C)[j+1]].ResNumber); //prints if smth changed
       }
 
       if ( strcmp(atoms_from[list_P[j]].ResNumber, atoms_from[(*list_C)[j]].ResNumber) == 0 )
@@ -168,7 +165,6 @@ unsigned int correctC1_P(struct atom *atoms_from, unsigned int **list_C, unsigne
         (*list_C) = (unsigned int *)realloc( (*list_C), sizeof(unsigned int)*((*n_C)+1) );
         for (i=(*n_C); i>j; i--)
           {(*list_C)[i] = (*list_C)[i-1];}
-        //printf("P: %s; C1: %s\n", atoms_from[list_P[j]].ResNumber, atoms_from[(*list_C)[j+1]].ResNumber); //prints if smth changed
       }
 
     }
@@ -322,7 +318,7 @@ double Measure3_p(double *measure, unsigned int ** list_hit, unsigned int n_hit,
 /********************************
 *                            3DNA
 ********************************/
-unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, char ***pairs, unsigned int *len, unsigned int server, char *max_score_filename, char priority1, char priority2)
+unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, char ***pairs, unsigned int *len, char *max_score_filename, char priority1, char priority2)
 {
 	FILE *fp, *out_file;
 	extern FILE *popen();
@@ -341,45 +337,25 @@ unsigned int run_3dna(char *pdb_name, unsigned int **compl, int ***compl_pairs, 
 		(*pairs)[j] = (char *)malloc(sizeof(char)*3);
 		(*compl_pairs)[j] = (int *)malloc(sizeof(int)*3);
 	}
-	if (server == 0)
+  sprintf(command, "find_pair %s find_pair.output", pdb_name);
+	fp = popen(command, "r");
+	if (fp == NULL)
 	{
-		sprintf(command, "find_pair %s out 2>/dev/null", pdb_name);
-		fp = popen(command, "r");
-		if (fp == NULL)
-		{
-			printf("Failed to run find_pair on %s\n", pdb_name);
+		FILE *max_score;
+		max_score = popen(max_score_filename, "w");
+			fprintf(max_score, "Error\nFailed to run find_pair on %s\n", pdb_name);
 			exit(1);
-		}
-		pclose(fp);
-		out_file = fopen("out", "r");
-		if (out_file == NULL)
-		{
-			perror("find_pair failed");
-			exit(1);
-		}
 	}
-	else
+	pclose(fp);
+	char outname[146];
+	sprintf(outname, "find_pair.output");
+	out_file = fopen(outname, "r");
+	if (out_file == NULL)
 	{
-    sprintf(command, "find_pair %s find_pair.output", pdb_name);
-		fp = popen(command, "r");
-		if (fp == NULL)
-		{
-			FILE *max_score;
-			max_score = popen(max_score_filename, "w");
-				fprintf(max_score, "Error\nFailed to run find_pair on %s\n", pdb_name);
-				exit(1);
-		}
-		pclose(fp);
-		char outname[146];
-		sprintf(outname, "find_pair.output");
-		out_file = fopen(outname, "r");
-		if (out_file == NULL)
-		{
-			FILE *max_score;
-			max_score = popen(max_score_filename, "w");
-			fprintf(max_score, "Error\nfind_pair failed");
-			exit(1);
-		}
+		FILE *max_score;
+		max_score = popen(max_score_filename, "w");
+		fprintf(max_score, "Error\nfind_pair failed");
+		exit(1);
 	}
 	fgets (c, 102, out_file);
 	fgets (c, 102, out_file);
@@ -748,41 +724,35 @@ void find_compl(struct atom *atoms1, unsigned int *list_P, unsigned int *list_C1
 	}
 
 	(*compl) = (n_P1+k-1);
-	//printf("k=%u; compl=%u; n_P1=%u\n", k, (*compl), n_P1 );
 }
 
 
-unsigned int run_find_compl(struct atom *atoms1_P, unsigned int n_P, unsigned int *compl, unsigned int *first_chain_length, int *compl_pair)
+unsigned int run_find_compl(struct atom *atoms1_C1, unsigned int n_C1, unsigned int *compl, unsigned int *first_chain_length, int *compl_pair)
 {
-	unsigned i, k, c, count, k_min, n_P1, n_P2;
+	unsigned i, k, c, count, k_min, n_C11, n_C12;
 	char res1[5], res2[5];
 
-	n_P1 = 0; n_P2 = 0;
-	for (i=1; i<=n_P; i++)
+	n_C11 = 0; n_C12 = 0;
+	for (i=1; i<=n_C1; i++)
 	{
-		//printf("%c.%s\n", atoms1_P[i].Chain, atoms1_P[i].ResNumber);
-		if (atoms1_P[i].Chain == atoms1_P[1].Chain)
-		{n_P1 += 1; }
-		else {n_P2 += 1; }
+		if (atoms1_C1[i].Chain == atoms1_C1[1].Chain)
+		{n_C11 += 1; }
+		else {n_C12 += 1; }
 	}
 
-	(*first_chain_length) = n_P1;
+	(*first_chain_length) = n_C11;
 
 	sprintf(res1, "%d", compl_pair[1]);
 	sprintf(res2, "%d", compl_pair[2]);
-	//printf("res1=%s res2=%s\n", res1, res2);
 
-	for (k=2; k<=n_P; k++)
-		for (i=1; i<=n_P1; i++)
+	for (k=2; k<=n_C1; k++)
+		for (i=1; i<=n_C11; i++)
 		{
-			if ( (k-i>=1) && (k-i<=n_P2) )
+			if ( (k-i>=1) && (k-i<=n_C12) )
 			{
-				//printf("k=%u i=%i %s=%s %s=%s\n", k, i, atoms1_P[i].ResNumber, res1, atoms1_P[n_P1+k-i].ResNumber, res2);
-				if ( (strcmp(atoms1_P[i].ResNumber, res1)==0) && (strcmp(atoms1_P[n_P1+k-i].ResNumber, res2)==0) )
+				if ( (strcmp(atoms1_C1[i].ResNumber, res1)==0) && (strcmp(atoms1_C1[n_C11+k-i].ResNumber, res2)==0) )
 				{
-          //printf("here !!!!\n");
-					//printf("n_P1=%u, k=%u\n", n_P1, k);
-					(*compl) = (n_P1+k-1);
+					(*compl) = (n_C11+k-1);
 					return 0;
 				}
 			}

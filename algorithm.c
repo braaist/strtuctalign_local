@@ -139,7 +139,6 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			// Enable if measure function returns unsigned int
 			for (unsigned int i=1; i<=n_P1; i++){
 				for (unsigned int j=1; j<=n_P2; j++){
-					//printf("%s\n", atoms_dna1[list_P1[i]].ResNumber);
 					list_measure[i][j] = 0;
 					if (i > n_OP11 || i > n_OP21 || i+1 > n_C11)continue;
 					if (j > n_OP12 || j > n_OP22 || j+1 > n_C12)continue;
@@ -177,6 +176,9 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			double S_max;
 			struct atom *atoms_dna_P1 = NULL;
 			struct atom *atoms_dna_P2 = NULL;
+			struct atom *atoms_dna_C11 = NULL;
+			struct atom *atoms_dna_C12 = NULL;
+
 
 
 			// print measure-table
@@ -206,21 +208,23 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			for (unsigned int i=1; i<=n_P2; i++) {
 				atomcpy(&atoms_dna_P2[i], atoms_dna2[list_P2[i]]);
 			}
-
+			atoms_dna_C12 = (struct atom *)malloc( sizeof(struct atom)*(n_C12+1) );
+			for (unsigned int i=1; i<=n_C12; i++) {
+				atomcpy(&atoms_dna_C12[i], atoms_dna2[list_C12[i]]);
+			}
+			atoms_dna_C11 = (struct atom *)malloc( sizeof(struct atom)*(n_C11+1) );
+			for (unsigned int i=1; i<=n_C11; i++) {
+				atomcpy(&atoms_dna_C11[i], atoms_dna1[list_C11[i]]);
+			}
 			//find_compl(atoms_dna1, list_P1, list_C11, list_OP11, list_OP21, atoms_dna_P1, n_P1, &compl1, &n_first_chain);
-			//printf("compl1: %d\n", compl1);
-			//printf("compl2: %d\n", compl2);
-			(run_find_compl(atoms_dna_P1, n_P1, &compl1, &n_first_chain, pdb1->compl_pairs[pair1]));
+			(run_find_compl(atoms_dna_C11, n_C11, &compl1, &n_first_chain, pdb1->compl_pairs[pair1]));
 			//find_compl(atoms_dna2, list_P2, list_C12, list_OP12, list_OP22, atoms_dna_P2, n_P2, &compl2, &m_first_chain);
-			(run_find_compl(atoms_dna_P2, n_P2, &compl2, &m_first_chain, pdb2->compl_pairs[pair2]));
+			(run_find_compl(atoms_dna_C12, n_C12, &compl2, &m_first_chain, pdb2->compl_pairs[pair2]));
 			BestDiag(list_measure, n_P1, n_P2, &S_max, &i_max, &j_max, &i_start, &j_start, &i_max_measure, &j_max_measure,
 					atoms_dna1, list_P1, atoms_dna2, list_P2, compl1, compl2, n_first_chain, m_first_chain);
 			// pdb.c function
-			printf("S_max in find best score %f\n", S_max);
-
 			/* Done diagonal search */
-			//printf("compl1 after diag: %d\n", compl1);
-			//printf("compl2: %d\n", compl2);
+
 			if (S_max > result->S_max)
 			{
 				result->S_max = S_max;
@@ -234,10 +238,7 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 				result->dna2_chain2_n = dna2_chain2_n;
 
 				atomlistcpy(&result->atoms_dna1, atoms_dna1, m1);
-				//printf("first %u\n", result->m1);
 				result->m1 = m1;
-				//printf("n_P1 %d\n", n_P1);
-				//printf("second %lu\n", sizeof(unsigned int)*(n_P1+1));
 				result->list_P1 = (unsigned int *)malloc(sizeof(unsigned int)*(n_P1+1));
 				result->list_C11 = (unsigned int *)malloc(sizeof(unsigned int)*(n_C11+1));
 				result->list_OP11 = (unsigned int *)malloc(sizeof(unsigned int)*(n_OP11+1));
@@ -270,6 +271,8 @@ void findBestScore(const struct pdb_info* pdb1, const struct pdb_info* pdb2, str
 			free(atoms_prot_C2);
 			free(atoms_dna_P1);
 			free(atoms_dna_P2);
+			free(atoms_dna_C11);
+			free(atoms_dna_C12);
 			free(dna2_chain1);
 			free(dna2_chain2);
 			free(atoms_dna2);
@@ -318,23 +321,22 @@ int main  (int argc, char **argv)
 	puts("\n");
 	/* Checking command line,
 	   throw exception if not complete */
-	//printf("%s %s %s %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+	printf("%s %s %s %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
 
-	if (argc != 11)
+	if (argc != 9)
 	{
-		printf("\nUsage: %s -i <input file> -o <output file> -f <file name for score> -s <is on server> -g <gk file>", argv[0]);
-		printf("\nExample: %s -i input.txt -o out.txt -i results.txt -s 1 -g out.gk\n\n", argv[0]);
+		printf("\nUsage: %s -i <input file> -o <output file> -f <file name for score> -g <gk file>", argv[0]);
+		printf("\nExample: %s -i input.txt -o out.txt -f results.txt -g out.gk\n\n", argv[0]);
 		exit (1);
 	}
 
   FILE * fp;
-	unsigned int SERVER;
   char *outfile, *inpfile, *gkfile, *max_score_filename;
   char** infiles;
   max_score_filename = (char *)malloc( sizeof(char)*(strlen(argv[6])+1) );
   inpfile = (char *)malloc( sizeof(char)*(strlen(argv[2])+1) );
   outfile = (char *)malloc( sizeof(char)*(strlen(argv[4])+1) );
-  gkfile = (char *)malloc( sizeof(char)*(strlen(argv[10])+1) );
+  gkfile = (char *)malloc( sizeof(char)*(strlen(argv[8])+1) );
   infiles = malloc(sizeof(char*) * 12);
   char* chain_names = malloc(12);
 	char** starts = malloc(sizeof(char*) * 12);
@@ -343,8 +345,7 @@ int main  (int argc, char **argv)
   sscanf(argv[2], "%s", inpfile);
   sscanf(argv[4], "%s", outfile);
   sscanf(argv[6], "%s", max_score_filename);
-	sscanf(argv[8], "%u", &SERVER);
-  sscanf(argv[10], "%s", gkfile);
+  sscanf(argv[8], "%s", gkfile);
 
   fp = fopen(inpfile, "r");
   if (fp == NULL)
@@ -416,7 +417,7 @@ int main  (int argc, char **argv)
 
 		/*** 3DNA block ***/
 		printf("%s\n", "Running find_pair from x3dna suite:");
-		run_3dna(infiles[pdb_i], &cur_pdb->compl_list, &cur_pdb->compl_pairs, &cur_pdb->pairs, &cur_pdb->n_pairs, SERVER, max_score_filename, '_', '_');
+		run_3dna(infiles[pdb_i], &cur_pdb->compl_list, &cur_pdb->compl_pairs, &cur_pdb->pairs, &cur_pdb->n_pairs, max_score_filename, '_', '_');
 		assert(cur_pdb->n_pairs > 0);
 		printf("%s\n", "find_pair completed succesfully!\n");
 	}
@@ -481,28 +482,21 @@ int main  (int argc, char **argv)
 		is_reverse2 = ((probe.j_max_measure > probe.m_first_chain) ? 1 : 0);
 		i_max_measure_compl = probe.compl1-probe.i_max_measure+1;
 		j_max_measure_compl = probe.compl2-probe.j_max_measure+1;
-		//printf("fin %d, %d, %d\n", probe.compl1, probe.i_max_measure+1, probe.compl1-probe.i_max_measure+1);
-		//printf("fin2 %d, %d, %d\n", probe.compl2, probe.j_max_measure+1, probe.compl2-probe.j_max_measure+1);
 		//printf("i_max_measure=%u i_max_measure_compl=%u\n", best_i_max_measure, i_max_measure_compl);
 		//printf("i_max_measure_compl=%s\n", best_atoms_dna1[best_list_P1[i_max_measure_compl]].ResNumber);
-		//printf("i_max_measure_compl =  %d, dna_n11+dna_n12 = %d\n",i_max_measure_compl, dna_n11+dna_n12);
-		if ((int)i_max_measure_compl > (int)(dna_n11+dna_n12))
+		if (i_max_measure_compl > dna_n11+dna_n12)
 		{
-			//printf("here!!!!!!\n");
-			//printf("i_compl=%u n11=%u n12=%u\n", i_max_measure_compl, dna_n11, dna_n12);
 			j_max_measure_compl = j_max_measure_compl-(i_max_measure_compl-dna_n11-dna_n12);
 			i_max_measure_compl = dna_n11+dna_n12;
-			//printf("i_compl=%u n11=%u n12=%u\n", i_max_measure_compl, dna_n11, dna_n12);
 		}
-		if ((int)j_max_measure_compl > (int)(dna_n21+dna_n22))
+		if (j_max_measure_compl > dna_n21+dna_n22)
 		{
-			//printf("j_compl=%u n21=%u n22=%u\n", j_max_measure_compl, dna_n21, dna_n22);
 			i_max_measure_compl = i_max_measure_compl-(j_max_measure_compl-dna_n21-dna_n22);
 			j_max_measure_compl = dna_n21+dna_n22;
-			//printf("j_compl=%u n21=%u n22=%u\n", j_max_measure_compl, dna_n21, dna_n22);
 		}
 
-		int i_max_measure_compl_num, j_max_measure_compl_num;
+		int i_max_measure_compl_num = 0;
+		int j_max_measure_compl_num = 0;
 		char *i_max_measure_compl_str, *j_max_measure_compl_str;
 		i_max_measure_compl_str = (char *)malloc( sizeof(char)*7 );
 		j_max_measure_compl_str = (char *)malloc( sizeof(char)*7 );
